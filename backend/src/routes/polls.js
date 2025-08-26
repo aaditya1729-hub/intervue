@@ -55,4 +55,14 @@ router.get('/:pollId/history', (req, res, next) => {
   }
 });
 
+router.get('/:pollId/students', (req, res, next) => {
+  try {
+    const poll = ensurePoll(req.params.pollId);
+    const students = Array.from(poll.students.values()).map(s => ({ id: s.id, name: s.name, isConnected: s.isConnected }));
+    res.json(students);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = router;
