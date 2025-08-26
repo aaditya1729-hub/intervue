@@ -76,6 +76,22 @@ function setupPollNamespace(io) {
       }
     });
 
+    socket.on('teacher:close_question', (payload, cb) => {
+      try {
+        if (role !== 'teacher') throw new Error('Unauthorized');
+        const closed = closeCurrentQuestion(pollId);
+        if (!closed) return cb && cb({ ok: false, error: 'No active question' });
+        const { results } = closed;
+        appendQuestionHistory(pollId, results);
+        const t = socket.data.currentTimer;
+        if (t) clearTimeout(t);
+        nsp.to(pollId).emit('poll:results', results);
+        cb && cb({ ok: true });
+      } catch (err) {
+        cb && cb({ ok: false, error: err.message });
+      }
+    });
+
     socket.on('student:answer', (payload, cb) => {
       try {
         if (role !== 'student') throw new Error('Unauthorized');

@@ -18,6 +18,7 @@ export default function TeacherDashboard(){
   const { results, currentQuestion, studentCount } = useSelector(s=>s.poll);
   const [history, setHistory] = useState([]);
   const [students, setStudents] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const socketRef = useRef(null);
 
   useEffect(()=>{
@@ -42,6 +43,12 @@ export default function TeacherDashboard(){
     });
   }
 
+  function closePoll(){
+    socketRef.current.emit('teacher:close_question', {}, (res)=>{
+      if (!res?.ok) alert(res?.error || 'Failed to close');
+    });
+  }
+
   function kickStudent(id){
     socketRef.current.emit('teacher:kick_student', { studentId: id }, ()=>{
       setStudents(s=>s.filter(x=>x.id!==id));
@@ -50,7 +57,16 @@ export default function TeacherDashboard(){
 
   return (
     <div className="container grid" style={{gap:20}}>
-      <Header title={`Teacher Dashboard • ${pollId}`} right={<div className="subtle">Students: {studentCount}</div>} />
+      <Header title={`Teacher Dashboard • ${pollId}`} right={<div className="row"><div className="subtle">Students: {studentCount}</div><button className="button secondary" onClick={()=>setMenuOpen(o=>!o)} style={{padding:'8px 12px'}}>⋮</button></div>} />
+
+      {menuOpen && (
+        <Card style={{maxWidth:240, position:'absolute', right:28, zIndex:5}}>
+          <div className="grid">
+            <button className="button secondary" onClick={closePoll}>Close Poll</button>
+            <button className="button secondary" onClick={()=>window.location.reload()}>View Results</button>
+          </div>
+        </Card>
+      )}
 
       {!currentQuestion && (
         <QuestionForm onStart={startQuestion} />
@@ -76,7 +92,7 @@ export default function TeacherDashboard(){
         </Card>
       )}
 
-      <div className="grid" style={{gridTemplateColumns:'2fr 1fr', gap:20}}>
+      <div className="grid grid-2-col" style={{gridTemplateColumns:'2fr 1fr', gap:20}}>
         <Card>
           <h3>History</h3>
           {history.length===0 && <div className="subtle">No past questions yet.</div>}
@@ -95,7 +111,7 @@ export default function TeacherDashboard(){
             {students.map(s => (
               <div key={s.id} className="row" style={{justifyContent:'space-between'}}>
                 <div>{s.name} {s.isConnected ? '' : '(left)'}</div>
-                <Button variant="ghost" onClick={()=>kickStudent(s.id)} style={{borderColor:'var(--danger)', color:'var(--danger)'}}>Remove</Button>
+                <button className="button secondary" onClick={()=>kickStudent(s.id)}>Remove</button>
               </div>
             ))}
             {students.length===0 && <div className="subtle">Waiting for students...</div>}

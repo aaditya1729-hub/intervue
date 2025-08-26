@@ -7,7 +7,7 @@ export default function ResultsChart({ options = [], counts = [], highlightIndex
         const pct = Math.round((c/total)*100);
         const barStyle = {
           width:`${pct}%`,
-          background: i===highlightIndex ? 'var(--primary-600)' : 'var(--primary)'
+          background: i===highlightIndex ? 'var(--primary-hover)' : 'var(--primary)'
         };
         return (
           <div key={i} className="grid" style={{gap:6}}>
