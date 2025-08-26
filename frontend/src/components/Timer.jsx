@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
 
+function fmt(sec){
+  const m = Math.floor(sec/60).toString().padStart(2,'0');
+  const s = Math.floor(sec%60).toString().padStart(2,'0');
+  return `${m}:${s}`;
+}
+
 export default function Timer({ seconds, onEnd }){
   const [left, setLeft] = useState(seconds);
   useEffect(()=>{
@@ -16,5 +22,5 @@ export default function Timer({ seconds, onEnd }){
     }, 1000);
     return () => clearInterval(t);
   }, [seconds, onEnd]);
-  return <div style={{fontVariantNumeric:'tabular-nums'}}>⏱ {left}s</div>;
+  return <div style={{fontVariantNumeric:'tabular-nums',fontWeight:600}}>{fmt(left)}</div>;
 }

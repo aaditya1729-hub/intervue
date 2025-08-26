@@ -108,7 +108,10 @@ function setupPollNamespace(io) {
         const student = removeStudent(pollId, studentId);
         if (student) {
           const s = nsp.sockets.get(student.socketId);
-          if (s) s.disconnect(true);
+          if (s) {
+            try { s.emit('student:kicked'); } catch {}
+            s.disconnect(true);
+          }
           nsp.to(pollId).emit('poll:student_count', { count: ensurePoll(pollId).students.size });
         }
         cb && cb({ ok: true });

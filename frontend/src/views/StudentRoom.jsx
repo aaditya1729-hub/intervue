@@ -7,6 +7,9 @@ import { setStudentId } from '../store/userSlice.js';
 import ResultsChart from '../components/ResultsChart.jsx';
 import Timer from '../components/Timer.jsx';
 import ChatPopup from '../components/ChatPopup.jsx';
+import Card from '../components/ui/Card.jsx';
+import Button from '../components/ui/Button.jsx';
+import Spinner from '../components/Spinner.jsx';
 
 export default function StudentRoom(){
   const { pollId } = useParams();
@@ -16,6 +19,7 @@ export default function StudentRoom(){
   const [question, setQuestion] = useState(null);
   const [selected, setSelected] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [kicked, setKicked] = useState(false);
   const socketRef = useRef(null);
 
   useEffect(()=>{
@@ -26,6 +30,7 @@ export default function StudentRoom(){
     socket.on('poll:question_started', (q) => { setQuestion(q); setSubmitted(false); setSelected(null); });
     socket.on('poll:progress', (r) => dispatch(setProgress(r)));
     socket.on('poll:results', (r) => dispatch(setResults(r)));
+    socket.on('student:kicked', () => { setKicked(true); socket.disconnect(); });
     return () => socket.disconnect();
   }, [pollId, dispatch, name]);
 
@@ -38,15 +43,22 @@ export default function StudentRoom(){
   }
 
   return (
-    <div className="container grid" style={{gap:20}}>
-      <h2>Poll • {pollId}</h2>
+    <div className="container grid" style={{gap:20, maxWidth:720}}>
+      <h2>Poll</h2>
 
-      {!question && (
-        <div className="card" style={{color:'var(--muted)'}}>Waiting for teacher to start a question…</div>
+      {kicked && (
+        <Card><h3>You've been kicked out!</h3><div className="subtle">This session has ended for you.</div></Card>
       )}
 
-      {question && (
-        <div className="card grid" style={{gap:12}}>
+      {!kicked && !question && (
+        <Card className="grid" style={{display:'grid',placeItems:'center',textAlign:'center',gap:12}}>
+          <Spinner />
+          <div className="subtle">Wait for the teacher to ask questions...</div>
+        </Card>
+      )}
+
+      {!kicked && question && (
+        <Card className="grid" style={{gap:12}}>
           <div className="row" style={{justifyContent:'space-between'}}>
             <h3>{question.text}</h3>
             <Timer seconds={question.timeLimitSeconds} />
@@ -54,22 +66,21 @@ export default function StudentRoom(){
           {!submitted ? (
             <div className="grid" style={{gap:10}}>
               {question.options.map((o,i)=> (
-                <label key={i} className="row" style={{gap:10}}>
-                  <input type="radio" name="opt" checked={selected===i} onChange={()=>setSelected(i)} />
-                  <div>{o}</div>
-                </label>
+                <button key={i} className={`option-button ${selected===i?'selected':''}`} onClick={()=>setSelected(i)}>
+                  {o}
+                </button>
               ))}
               <div className="row" style={{justifyContent:'flex-end'}}>
-                <button onClick={submit} disabled={selected==null}>Submit</button>
+                <Button onClick={submit} disabled={selected==null}>Submit</Button>
               </div>
             </div>
           ): (
-            <div>
-              <div style={{marginBottom:10}}>Thanks! Here are live results:</div>
-              {results && <ResultsChart options={question.options} counts={results.counts || []} />}
+            <div className="grid" style={{gap:6}}>
+              <div className="subtle">You have voted</div>
+              {results && <ResultsChart options={question.options} counts={results.counts || []} highlightIndex={selected} />}
             </div>
           )}
-        </div>
+        </Card>
       )}
 
       <ChatPopup socket={socketRef.current} />

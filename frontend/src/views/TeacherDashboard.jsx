@@ -63,7 +63,12 @@ export default function TeacherDashboard(){
             <Timer seconds={currentQuestion.timeLimitSeconds} />
           </div>
           {results && (
-            <ResultsChart options={currentQuestion.options} counts={results.counts || []} />
+            <>
+              <ResultsChart options={currentQuestion.options} counts={results.counts || []} />
+              <div className="row" style={{justifyContent:'flex-end'}}>
+                <Button onClick={()=>window.location.reload()}>Ask New Question</Button>
+              </div>
+            </>
           )}
           {!results && (
             <div className="subtle">Waiting for responses...</div>
@@ -85,12 +90,12 @@ export default function TeacherDashboard(){
           </div>
         </Card>
         <Card>
-          <h3>Students</h3>
+          <h3>Students in Session</h3>
           <div className="grid" style={{gap:8}}>
             {students.map(s => (
               <div key={s.id} className="row" style={{justifyContent:'space-between'}}>
                 <div>{s.name} {s.isConnected ? '' : '(left)'}</div>
-                <Button variant="ghost" onClick={()=>kickStudent(s.id)} style={{background:'var(--danger)', borderColor:'var(--danger)'}}>Remove</Button>
+                <Button variant="ghost" onClick={()=>kickStudent(s.id)} style={{borderColor:'var(--danger)', color:'var(--danger)'}}>Remove</Button>
               </div>
             ))}
             {students.length===0 && <div className="subtle">Waiting for students...</div>}
