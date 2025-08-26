@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  backend:
+    build: .
+    image: live-poll-backend:latest
+    environment:
+      - PORT=4000
+      - CORS_ORIGIN=*
+      - POLL_TIME_LIMIT_DEFAULT=60
+      - DATA_DIR=storage
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/app
+      - /app/node_modules
+      - ./storage:/app/storage
