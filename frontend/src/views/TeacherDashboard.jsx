@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { connectPoll } from '../services/socket.js';
@@ -8,6 +8,9 @@ import QuestionForm from '../components/QuestionForm.jsx';
 import ResultsChart from '../components/ResultsChart.jsx';
 import Timer from '../components/Timer.jsx';
 import ChatPopup from '../components/ChatPopup.jsx';
+import Header from '../components/ui/Header.jsx';
+import Card from '../components/ui/Card.jsx';
+import Button from '../components/ui/Button.jsx';
 
 export default function TeacherDashboard(){
   const { pollId } = useParams();
@@ -47,17 +50,14 @@ export default function TeacherDashboard(){
 
   return (
     <div className="container grid" style={{gap:20}}>
-      <div className="row" style={{justifyContent:'space-between'}}>
-        <h2>Teacher Dashboard • {pollId}</h2>
-        <div>Students: {studentCount}</div>
-      </div>
+      <Header title={`Teacher Dashboard • ${pollId}`} right={<div className="subtle">Students: {studentCount}</div>} />
 
       {!currentQuestion && (
         <QuestionForm onStart={startQuestion} />
       )}
 
       {currentQuestion && (
-        <div className="card grid" style={{gap:12}}>
+        <Card style={{display:'grid', gap:12}}>
           <div className="row" style={{justifyContent:'space-between'}}>
             <h3>{currentQuestion.text}</h3>
             <Timer seconds={currentQuestion.timeLimitSeconds} />
@@ -66,36 +66,36 @@ export default function TeacherDashboard(){
             <ResultsChart options={currentQuestion.options} counts={results.counts || []} />
           )}
           {!results && (
-            <div style={{color:'var(--muted)'}}>Waiting for responses...</div>
+            <div className="subtle">Waiting for responses...</div>
           )}
-        </div>
+        </Card>
       )}
 
       <div className="grid" style={{gridTemplateColumns:'2fr 1fr', gap:20}}>
-        <div className="card">
+        <Card>
           <h3>History</h3>
-          {history.length===0 && <div style={{color:'var(--muted)'}}>No past questions yet.</div>}
+          {history.length===0 && <div className="subtle">No past questions yet.</div>}
           <div className="grid" style={{gap:12}}>
             {history.map(h => (
-              <div key={h.id} className="card">
+              <Card key={h.id}>
                 <div style={{fontWeight:600, marginBottom:8}}>{h.text}</div>
                 <ResultsChart options={h.options} counts={h.counts} />
-              </div>
+              </Card>
             ))}
           </div>
-        </div>
-        <div className="card">
+        </Card>
+        <Card>
           <h3>Students</h3>
           <div className="grid" style={{gap:8}}>
             {students.map(s => (
               <div key={s.id} className="row" style={{justifyContent:'space-between'}}>
                 <div>{s.name} {s.isConnected ? '' : '(left)'}</div>
-                <button onClick={()=>kickStudent(s.id)} style={{background:'var(--danger)'}}>Remove</button>
+                <Button variant="ghost" onClick={()=>kickStudent(s.id)} style={{background:'var(--danger)', borderColor:'var(--danger)'}}>Remove</Button>
               </div>
             ))}
-            {students.length===0 && <div style={{color:'var(--muted)'}}>Waiting for students...</div>}
+            {students.length===0 && <div className="subtle">Waiting for students...</div>}
           </div>
-        </div>
+        </Card>
       </div>
 
       <ChatPopup socket={socketRef.current} />

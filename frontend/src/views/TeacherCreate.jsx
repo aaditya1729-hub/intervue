@@ -1,8 +1,12 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { createPoll } from '../services/api.js';
 import { setPollMeta } from '../store/pollSlice.js';
+import Card from '../components/ui/Card.jsx';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
+import Header from '../components/ui/Header.jsx';
 
 export default function TeacherCreate(){
   const [title, setTitle] = useState('Class Poll');
@@ -18,20 +22,22 @@ export default function TeacherCreate(){
 
   return (
     <div className="container">
-      <div className="card grid" style={{maxWidth:640, margin:'40px auto'}}>
-        <h2>Create a new poll</h2>
-        <div className="row">
-          <label style={{minWidth:140}}>Title</label>
-          <input value={title} onChange={e=>setTitle(e.target.value)} />
+      <Header title="Create a new poll" />
+      <Card>
+        <div className="grid" style={{gap:14}}>
+          <div className="grid" style={{gap:6}}>
+            <label>Title</label>
+            <Input value={title} onChange={e=>setTitle(e.target.value)} />
+          </div>
+          <div className="grid" style={{gap:6}}>
+            <label>Time limit (seconds)</label>
+            <Input type="number" min={10} max={300} value={timeLimit} onChange={e=>setTimeLimit(e.target.value)} />
+          </div>
+          <div className="row" style={{justifyContent:'flex-end'}}>
+            <Button onClick={onCreate}>Create Poll</Button>
+          </div>
         </div>
-        <div className="row">
-          <label style={{minWidth:140}}>Time limit (sec)</label>
-          <input type="number" min={10} max={300} value={timeLimit} onChange={e=>setTimeLimit(e.target.value)} />
-        </div>
-        <div className="row" style={{justifyContent:'flex-end'}}>
-          <button onClick={onCreate}>Create Poll</button>
-        </div>
-      </div>
+      </Card>
     </div>
   );
 }
